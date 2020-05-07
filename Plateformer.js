@@ -26,13 +26,19 @@ export class Plateformer {
     this.nTileHeight = 8;
     
     //debugger;
+    /*
     let ScreenWidth = width; // canvas width
     let ScreenHeight = height; // canvas height
+*/
 
+    let ScreenWidth = this.Screen.ConsoleCharWidth(); // canvas width
+    let ScreenHeight = this.Screen.ConsoleCharHeight();
+    
 
 	this.nVisibleTilesX = ScreenWidth / this.nTileWidth;
     this.nVisibleTilesY = ScreenHeight / this.nTileHeight;
     
+    this.previousKeycode=0
     console.log("nVisibleTilesX",this.nVisibleTilesX)
     console.log("nVisibleTilesY",this.nVisibleTilesY)
     console.log(this)
@@ -83,6 +89,65 @@ export class Plateformer {
 
     onUserUpdate() {
     // update and draw
+
+    fPlayerVelX = 0.0
+    fPlayerVelY = 0.0
+
+    this.Screen.clear()
+
+    // handle input
+    // result : this.requestedAction (one letter)
+    if (keyIsPressed) {
+        this.keyHeld = (keyCode == this.previousKeyCode);
+        // this.keyHeld = false;
+
+        switch (keyCode) {
+
+            case 38:
+                fPlayerVelY = -6.0
+                break;
+
+            case 40:
+                fPlayerVelY = 6.0
+                //  this.requestedAction = "D"; // accelerate downwards
+                //  break;
+                break;
+
+            case 37:
+                // left
+                fPlayerVelX = -6.0
+                break;
+
+            case 39:
+                // right
+                fPlayerVelX = 6.0
+                break;
+                /*
+                            case 32:
+                              if (!this.keyHeld) { // if "space" no double jump
+
+                              }
+                              break;
+                */
+                //case 27:
+                //  this.requestedAction = "X"; // exit
+                //  break;
+            default:
+        }
+        this.previousKeyCode = keyCode;
+        
+    } else {
+        this.keyHeld = false;
+        this.previousKeyCode = 0;
+    }
+
+
+    //console.log(deltaTime)
+
+    let elapsedTime = deltaTime/1000
+    fPlayerPosX = fPlayerPosX + fPlayerVelX * elapsedTime
+    fPlayerPosY = fPlayerPosY + fPlayerVelY * elapsedTime
+
     // Link camera to player position
         
 	fCameraPosX = fPlayerPosX;
@@ -97,6 +162,8 @@ export class Plateformer {
     if (this.fOffsetX > nLevelWidth - this.nVisibleTilesX) this.fOffsetX = nLevelWidth - this.nVisibleTilesX;
     if (this.fOffsetY > nLevelHeight - this.nVisibleTilesY) this.fOffsetY = nLevelHeight - this.nVisibleTilesY;
 
+    //console.log(this.fOffsetX)
+    //console.log(this.fOffsetY)
      
     // this displays the whole level
     for (let x=0; x<43; x++)
@@ -121,10 +188,15 @@ export class Plateformer {
     // debugger
     let nScaledTilesX = this.nVisibleTilesX / this.nTileWidth
     let nScaledTilesY = this.nVisibleTilesY / this.nTileHeight
-
+/*
     for (let x = 0; x < nScaledTilesX ; x++) {
         for (let y = 0; y < nScaledTilesY ; y++) {
-            TileChar = this.getTileChar(x, y)
+*/
+    for (let x = 0; x < this.nVisibleTilesX ; x++) {
+        for (let y = 0; y < this.nVisibleTilesY ; y++) {
+            TileChar = this.getTileChar(x + parseInt(this.fOffsetX), y + parseInt(this.fOffsetY))
+//            TileChar = this.getTileChar(x , y)
+
 
             switch (TileChar) {                
                 case '.':
@@ -143,12 +215,22 @@ export class Plateformer {
 
             }
         }
-    }
+    } // end for
+
+
+    // player
+    let xP = fPlayerPosX-this.fOffsetX    
+    //console.log(fPlayerPosX-this.fOffsetX)
+    let yP = fPlayerPosY-this.fOffsetY
+    //console.log(fPlayerPosY-this.fOffsetY)
+    this.Screen.textFill( parseInt(xP * this.nTileWidth),parseInt(yP * this.nTileHeight), parseInt(((xP + 1.0) * this.nTileWidth))-1, parseInt(((yP + 1.0) * this.nTileHeight))-1, PIXEL_TYPE.PIXEL_SOLID, "red")                    
+
 
     }
 
     getTileChar(xx,yy) {
 
+        //console.log(xx," ; ", yy)
         if (xx>-1 && xx < nLevelWidth && yy >-1 && yy < nLevelHeight) {
             return sLevel.charAt(xx + yy * nLevelWidth)
         }

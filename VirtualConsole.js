@@ -136,9 +136,18 @@ export class VirtualConsole {
     return this.W * this.nbCols
   }
 
+  ConsoleCharWidth() { // in pixels
+    return this.nbCols
+  }
+
   ConsoleHeight() {
     return this.H * this.nbLines
   }
+
+  ConsoleCharHeight() {
+    return this.nbLines
+  }
+
 
   draw()   {
     push()

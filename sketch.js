@@ -21,7 +21,7 @@ function setup() {
 
 function setup() {
   
-  createCanvas(1200,768);
+  createCanvas(1200,768); // divisible by 16
   noSmooth();
   setAttributes('antialias', true);
 
@@ -32,7 +32,7 @@ function setup() {
 
 //  vs.setOriginX(20)
 //  vs.setOriginY(10)
-  vs.setBg('darkblue')
+  vs.setBg('steelblue')
   
   /*
   vs.textFill(0,0,0,0, PIXEL_TYPE.PIXEL_SOLID ,'orange')
