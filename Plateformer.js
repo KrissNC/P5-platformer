@@ -7,6 +7,10 @@ let nLevelHeight;
 let fPlayerPosX;
 let fPlayerPosY;
 
+let fNewPlayerPosX;
+let fNewPlayerPosY;
+
+
 let fPlayerVelX;
 let fPlayerVelY;
 let bPlayerOnGround;
@@ -160,8 +164,50 @@ export class Plateformer {
     //console.log(deltaTime)
 
     let elapsedTime = deltaTime/1000
-    fPlayerPosX = fPlayerPosX + fPlayerVelX * elapsedTime
-    fPlayerPosY = fPlayerPosY + fPlayerVelY * elapsedTime
+    fNewPlayerPosX = fPlayerPosX + fPlayerVelX * elapsedTime
+    fNewPlayerPosY = fPlayerPosY + fPlayerVelY * elapsedTime
+
+    // Check for Collision
+    if (fPlayerVelX <= 0) // Moving Left
+    {
+        if (this.getTileChar(0|fNewPlayerPosX, 0|fPlayerPosY) != '.' || this.getTileChar(fNewPlayerPosX|0, 0|(fPlayerPosY + 0.9)) != '.')
+        {
+            fNewPlayerPosX = (0|fNewPlayerPosX) + 1;
+            fPlayerVelX = 0;
+        }
+    }
+    else // Moving Right
+    {
+        if (this.getTileChar((fNewPlayerPosX + 1.0)|0, fPlayerPosY|0) != '.' || this.getTileChar((fNewPlayerPosX + 1.0)|0, (fPlayerPosY + 0.9)|0) != '.')
+        {
+            fNewPlayerPosX = 0|fNewPlayerPosX;
+            fPlayerVelX = 0;
+            
+        }
+    }
+
+    bPlayerOnGround = false;
+    if (fPlayerVelY <= 0) // Moving Up
+    {
+        if (this.getTileChar(fNewPlayerPosX|0, fNewPlayerPosY|0) != '.' || this.getTileChar((fNewPlayerPosX + 0.9)|0, fNewPlayerPosY|0) != '.')
+        {
+            fNewPlayerPosY = (0|fNewPlayerPosY) + 1;
+            fPlayerVelY = 0;
+        }
+    }
+    else // Moving Down
+    {
+        if (this.getTileChar(0|fNewPlayerPosX, (fNewPlayerPosY + 1.0)|0) != '.' || this.getTileChar((fNewPlayerPosX + 0.9)|0, (fNewPlayerPosY + 1.0)|0) != '.')
+        {
+            fNewPlayerPosY = 0|fNewPlayerPosY;
+            fPlayerVelY = 0;
+            bPlayerOnGround = true; // Player has a solid surface underfoot
+            // nDirModX = 0;
+        }
+    }
+   
+    fPlayerPosX = fNewPlayerPosX    
+    fPlayerPosY = fNewPlayerPosY
 
     // Link camera to player position
         
@@ -180,8 +226,9 @@ export class Plateformer {
     if (this.fOffsetX > ( maximumX)) this.fOffsetX = maximumX;
 
     if (this.fOffsetY > (nLevelHeight - this.nVisibleTilesY)) this.fOffsetY = nLevelHeight - this.nVisibleTilesY;
-
+    
     this.debug(0,0,"fOfssetX>" + nf(this.fOffsetX,3,2).toString())
+
     //console.log("offsetX ",this.fOffsetX)
     //console.log(this.fOffsetY)
     
@@ -195,36 +242,17 @@ export class Plateformer {
         }
     */
 
-    //console.log(this)
 
-    /* for (let xx = 0; xx < this.nVisibleTilesX; xx++) {
-        console.log("one line") 
-        for (let y = 0; y < this.nVisibleTilesY; y++) { */
-
-    //debugger;
     let TileChar    
     
-/*
-    for (let x = 0; x < nScaledTilesX ; x++) {
-        for (let y = 0; y < nScaledTilesY ; y++) {
-*/
 	// Get offsets for smooth movement
     let fTileOffsetX = (this.fOffsetX - (this.fOffsetX|0)) * this.nTileWidth;
     let fTileOffsetY = (this.fOffsetY - (this.fOffsetY|0)) * this.nTileHeight;
 
-    /*
-    console.log(this.fOffsetY)
-    console.log(this.fOffsetY|0)
-    */
-
     for (let x = 0; x <= this.nVisibleTilesX ; x++) {
         for (let y = 0; y <= this.nVisibleTilesY ; y++) {
 
-//            if (fPlayerPosX < maximumX)
                 TileChar = this.getTileChar(x + parseInt(this.fOffsetX), y + parseInt(this.fOffsetY))
-
-//            TileChar = this.getTileChar(x , y)
-
 
             switch (TileChar) {
                 case '.':
@@ -248,30 +276,20 @@ export class Plateformer {
         } // 2nd for
     } // end for
 
-
-    // console.log(fPlayerPosX)
-    // console.log(fPlayerPosY)
-
     this.debug(16,0,"player pos X>" + nf(fPlayerPosX,3,2).toString())
     
     // player
     let xP = fPlayerPosX - this.fOffsetX    
-    //console.log(fPlayerPosX-this.fOffsetX)
     let yP = fPlayerPosY - this.fOffsetY
 
     this.debug(16,2,"subtraction>" + nf(xP,3,2).toString())
 
-    //console.log(fPlayerPosY-this.fOffsetY)
     this.Screen.textFill( (xP * this.nTileWidth)|0,0|(yP * this.nTileHeight), 0|(((xP + 1.0) * this.nTileWidth)-1), 0|(((yP + 1.0) * this.nTileHeight)-1), PIXEL_TYPE.PIXEL_SOLID, "red")
-
-    //this.Screen.gotoXY((xP * this.nTileWidth)|0,0|(yP * this.nTileHeight))
-    //this.Screen.write("THIS IS AN AMAZING JOB")
 
     }
 
     getTileChar(xx,yy) {
 
-        //console.log(xx," ; ", yy)
         if (xx>-1 && xx < nLevelWidth && yy >-1 && yy < nLevelHeight) {
             return sLevel.charAt(xx + yy * nLevelWidth)
         }
@@ -295,12 +313,10 @@ export class Plateformer {
     debug(x, y, st) {
         let l= st.length
         let Erase = "                                                  ".substring(0,l)
-        
         this.debugScreen.gotoXY(x,y)
         this.debugScreen.write(Erase)
         this.debugScreen.gotoXY(x,y)
-        this.debugScreen.write(st)
-    
+        this.debugScreen.write(st)   
     }
 
 }
