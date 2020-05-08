@@ -5,8 +5,6 @@ import {Plateformer} from './Plateformer.js'
 let vs
 let game
 
-let myFont
-
 function preload() {
 }
 
@@ -21,9 +19,9 @@ function setup() {
 
 function setup() {
   
-  createCanvas(1200,768); // divisible by 16
+  createCanvas(1280,840); // divisible by 16
   noSmooth();
-  setAttributes('antialias', true);
+  setAttributes('antialias', false);
 
   vs = new VirtualConsole(160,96, 8, 8, 'Roboto Mono', 8)
   // these are OK
@@ -49,11 +47,9 @@ function setup() {
     vs.putchar(PIXEL_TYPE.PIXEL_SOLID)
   }
   */
-
   
   game = new Plateformer(vs)
   game.start();
-
 
   //game.onUserUpdate()
   //noLoop()
@@ -61,7 +57,7 @@ function setup() {
 }
 
 function draw() {
-  //background(128)
+  background(80)
   //vs.draw()
   game.onUserUpdate()
   game.draw()

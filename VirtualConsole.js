@@ -77,11 +77,20 @@ export class VirtualConsole {
     // this.bgs && this.bgs.fill(this.backgroundC)
   }
 
+  clip(value, min, max )
+  {
+    if (value < min) return min
+    if (value > max) return max
+    return value
+  }
+
   // rectangle filling with a char and ink
   textFill(x1, y1, x2, y2, chr, ink)
   {
-//    console.log("filling " , x1, y1, x2, y2, chr, ink)
-//    console.log("offSet is : ", this.offSet)
+      x1=this.clip(x1, 0, this.nbCols-1)
+      y1=this.clip(y1, 0, this.nbLines-1) 
+      x2=this.clip(x2, 0, this.nbCols-1)
+      y2=this.clip(y2, 0, this.nbLines-1)
 
     for(let y=y1 ; y <= y2 ; y++) {
       this.gotoXY(x1,y)

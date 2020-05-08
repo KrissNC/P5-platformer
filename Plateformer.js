@@ -1,4 +1,4 @@
-import {PIXEL_TYPE} from './VirtualConsole.js'
+import {VirtualConsole,PIXEL_TYPE} from './VirtualConsole.js'
 let sLevel='';
 let nLevelWidth;
 let nLevelHeight;
@@ -15,12 +15,26 @@ let bPlayerOnGround;
 let fCameraPosX;
 let fCameraPosY;
 
+let debugMode=true
+let debugScreen
 
 export class Plateformer {
 
     constructor( virtualScreen ) {
 
-    this.Screen=virtualScreen
+    if (debugMode) 
+        {
+            this.debugScreen = new VirtualConsole(80, 6, 11, 12, 'Roboto Mono', 14)
+            console.log(this.debugScreen)
+
+            this.debugScreen.setOriginX(0)
+            this.debugScreen.setOriginY(768)
+            //this.debugScreen.setBg("lightgrey")
+//            this.debugScreen.clear()
+
+        }
+
+    this.Screen= virtualScreen
     
     this.nTileWidth = 8;
     this.nTileHeight = 8;
@@ -39,9 +53,9 @@ export class Plateformer {
     this.nVisibleTilesY = ScreenHeight / this.nTileHeight;
     
     this.previousKeycode=0
-    console.log("nVisibleTilesX",this.nVisibleTilesX)
-    console.log("nVisibleTilesY",this.nVisibleTilesY)
-    console.log(this)
+    //console.log("nVisibleTilesX",this.nVisibleTilesX)
+    //console.log("nVisibleTilesY",this.nVisibleTilesY)
+    //console.log(this)
 
     }
 
@@ -52,26 +66,27 @@ export class Plateformer {
     nLevelHeight = 16;
 
     sLevel = ""
-    sLevel += "................................................................";
-    sLevel += "..GGGG..........................................................";
-    sLevel += "........#####...................................................";
-    sLevel += ".......####.....................................................";
+    sLevel += "...............................................................#";
+    sLevel += "...............................................................#";
+    sLevel += "........#####..................................................#";
+    sLevel += ".......####....................................................#";
     sLevel += ".......................########................................#";
-    sLevel += ".....##########.......###..............#.#......................";
+    sLevel += ".....##########.......###..............#.#....................O#";
     sLevel += "....................###................#.#......................";
     sLevel += "...................####.........................................";
-    sLevel += "#####...############...#############.##############.....########";
+    sLevel += "#####...#######OOO##...#############.##############.....########";
     sLevel += "...................................#.#...............###........";
-    sLevel += "...#######GG###.........############.#............###...........";
-    sLevel += "...G..........G.........#............#.........###..............";
+    sLevel += "...############.........############.#............###...........";
+    sLevel += "...#..........#.........#............#.........###..............";
     sLevel += "........................#.############......###.................";
     sLevel += "........................#................###....................";
     sLevel += "........................#################.......................";
-    sLevel += "................................................................";
-
+    sLevel += "....OOOOO.......................................................";
+    
     // Player Properties
 	fPlayerPosY = 1.0;
-	fPlayerVelX = 0.0;
+    fPlayerVelX = 0.0;
+    
 	fPlayerVelY = 0.0;
     fPlayerPosX = 1.0;
     
@@ -156,25 +171,29 @@ export class Plateformer {
    	// Calculate Top-Leftmost visible tile
     this.fOffsetX = fCameraPosX - (this.nVisibleTilesX+0.0) / 2.0;
     this.fOffsetY = fCameraPosY - (this.nVisibleTilesY+0.0) / 2.0;
-           
+    
+    // Clipping
     if (this.fOffsetX < 0) this.fOffsetX = 0;
     if (this.fOffsetY < 0) this.fOffsetY = 0;
-    if (this.fOffsetX > nLevelWidth - this.nVisibleTilesX) this.fOffsetX = nLevelWidth - this.nVisibleTilesX;
-    if (this.fOffsetY > nLevelHeight - this.nVisibleTilesY) this.fOffsetY = nLevelHeight - this.nVisibleTilesY;
 
-    //console.log(this.fOffsetX)
+    let maximumX = nLevelWidth - this.nVisibleTilesX
+    if (this.fOffsetX > ( maximumX)) this.fOffsetX = maximumX;
+
+    if (this.fOffsetY > (nLevelHeight - this.nVisibleTilesY)) this.fOffsetY = nLevelHeight - this.nVisibleTilesY;
+
+    this.debug(0,0,"fOfssetX>" + nf(this.fOffsetX,3,2).toString())
+    //console.log("offsetX ",this.fOffsetX)
     //console.log(this.fOffsetY)
-     
+    
+    /*
     // this displays the whole level
-    for (let x=0; x<43; x++)
-        for (let y=0; y<15; y++) {
-
+    for (let x=0; x<64; x++)
+        for (let y=0; y<16; y++) {
             let c = this.getTileChar(x,y)
-
-            this.Screen.gotoXY(x+106,y)            
+            this.Screen.gotoXY(x+96,y)            
             this.Screen.putchar(c)    
         }
-    
+    */
 
     //console.log(this)
 
@@ -185,46 +204,68 @@ export class Plateformer {
     //debugger;
     let TileChar    
     
-    // debugger
-    let nScaledTilesX = this.nVisibleTilesX / this.nTileWidth
-    let nScaledTilesY = this.nVisibleTilesY / this.nTileHeight
 /*
     for (let x = 0; x < nScaledTilesX ; x++) {
         for (let y = 0; y < nScaledTilesY ; y++) {
 */
-    for (let x = 0; x < this.nVisibleTilesX ; x++) {
-        for (let y = 0; y < this.nVisibleTilesY ; y++) {
-            TileChar = this.getTileChar(x + parseInt(this.fOffsetX), y + parseInt(this.fOffsetY))
+	// Get offsets for smooth movement
+    let fTileOffsetX = (this.fOffsetX - (this.fOffsetX|0)) * this.nTileWidth;
+    let fTileOffsetY = (this.fOffsetY - (this.fOffsetY|0)) * this.nTileHeight;
+
+    /*
+    console.log(this.fOffsetY)
+    console.log(this.fOffsetY|0)
+    */
+
+    for (let x = 0; x <= this.nVisibleTilesX ; x++) {
+        for (let y = 0; y <= this.nVisibleTilesY ; y++) {
+
+//            if (fPlayerPosX < maximumX)
+                TileChar = this.getTileChar(x + parseInt(this.fOffsetX), y + parseInt(this.fOffsetY))
+
 //            TileChar = this.getTileChar(x , y)
 
 
-            switch (TileChar) {                
+            switch (TileChar) {
                 case '.':
                     break;
 
+                case 'O':
+                    //this.Screen.textFill(x * this.nTileWidth - fTileOffsetX, y * this.nTileHeight - fTileOffsetY, ((x + 1) * fTileOffsetX) - (1 + this.fOffsetX), ((y + 1) * this.nTileHeight) - (1 + fTileOffsetY), PIXEL_TYPE.PIXEL_SOLID, "yellow")
+                    this.Screen.textFill(x * this.nTileWidth -(0|fTileOffsetX), y * this.nTileHeight -(0|fTileOffsetY), ((x + 1) * this.nTileWidth) - (1 +(0|fTileOffsetX)), ((y + 1) * this.nTileHeight) - (1 +(0|fTileOffsetY)), PIXEL_TYPE.PIXEL_SOLID, "orange")
+                    break;
+                        
                 case '#':
-                    this.Screen.textFill(x * this.nTileWidth, y * this.nTileHeight, ((x + 1) * this.nTileWidth)-1, ((y + 1) * this.nTileHeight)-1, PIXEL_TYPE.PIXEL_SOLID, "yellow")
+                    //this.Screen.textFill(x * this.nTileWidth - fTileOffsetX, y * this.nTileHeight - fTileOffsetY, ((x + 1) * fTileOffsetX) - (1 + this.fOffsetX), ((y + 1) * this.nTileHeight) - (1 + fTileOffsetY), PIXEL_TYPE.PIXEL_SOLID, "yellow")
+                    this.Screen.textFill(x * this.nTileWidth -(0|fTileOffsetX), y * this.nTileHeight -(0|fTileOffsetY), ((x + 1) * this.nTileWidth) - (1 +(0|fTileOffsetX)), ((y + 1) * this.nTileHeight) - (1 +(0|fTileOffsetY)), PIXEL_TYPE.PIXEL_SOLID, "yellow")
+                    //this.Screen.textFill(x * this.nTileWidth - fTileOffsetX, y * this.nTileHeight - fTileOffsetY, ((x + 1) * fTileOffsetX) - (1 + this.fOffsetX), ((y + 1) * this.nTileHeight) - (1 + fTileOffsetY), PIXEL_TYPE.PIXEL_SOLID, "yellow")
+                    
                     break;
-                case 'G':
-                    this.Screen.textFill(x * this.nTileWidth, y * this.nTileHeight, ((x + 1) * this.nTileWidth)-1, ((y + 1) * this.nTileHeight)-1, PIXEL_TYPE.PIXEL_SOLID, "green")                    
-                    break;
-
                 default:
-                    console.log("alert ! : ", TileChar)
-                    break;
-
-            }
-        }
+                     console.log("alert ! : ", TileChar) 
+                     break;                    
+            } //switch
+        } // 2nd for
     } // end for
 
 
-    // player
-    let xP = fPlayerPosX-this.fOffsetX    
-    //console.log(fPlayerPosX-this.fOffsetX)
-    let yP = fPlayerPosY-this.fOffsetY
-    //console.log(fPlayerPosY-this.fOffsetY)
-    this.Screen.textFill( parseInt(xP * this.nTileWidth),parseInt(yP * this.nTileHeight), parseInt(((xP + 1.0) * this.nTileWidth))-1, parseInt(((yP + 1.0) * this.nTileHeight))-1, PIXEL_TYPE.PIXEL_SOLID, "red")                    
+    // console.log(fPlayerPosX)
+    // console.log(fPlayerPosY)
 
+    this.debug(16,0,"player pos X>" + nf(fPlayerPosX,3,2).toString())
+    
+    // player
+    let xP = fPlayerPosX - this.fOffsetX    
+    //console.log(fPlayerPosX-this.fOffsetX)
+    let yP = fPlayerPosY - this.fOffsetY
+
+    this.debug(16,2,"subtraction>" + nf(xP,3,2).toString())
+
+    //console.log(fPlayerPosY-this.fOffsetY)
+    this.Screen.textFill( (xP * this.nTileWidth)|0,0|(yP * this.nTileHeight), 0|(((xP + 1.0) * this.nTileWidth)-1), 0|(((yP + 1.0) * this.nTileHeight)-1), PIXEL_TYPE.PIXEL_SOLID, "red")
+
+    //this.Screen.gotoXY((xP * this.nTileWidth)|0,0|(yP * this.nTileHeight))
+    //this.Screen.write("THIS IS AN AMAZING JOB")
 
     }
 
@@ -247,5 +288,19 @@ export class Plateformer {
 
     draw() {
         this.Screen.draw()
+
+        this.debugScreen.draw()
     }
+
+    debug(x, y, st) {
+        let l= st.length
+        let Erase = "                                                  ".substring(0,l)
+        
+        this.debugScreen.gotoXY(x,y)
+        this.debugScreen.write(Erase)
+        this.debugScreen.gotoXY(x,y)
+        this.debugScreen.write(st)
+    
+    }
+
 }
