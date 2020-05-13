@@ -1,3 +1,5 @@
+import { CONSOLE_COLOR, P5COLOR} from "./ConsoleColors.js"
+
 export class VirtualConsole {
 
   constructor( pCols, pLines, pWi, pHe, pFont, pSize) {
@@ -35,6 +37,9 @@ export class VirtualConsole {
     this.chars= new Array(this.nbElems)
 
     this.clear()
+
+    this.P5colors = new P5COLOR() 
+    
     //console.log(this)
   }
 
@@ -62,15 +67,18 @@ export class VirtualConsole {
 
   setColorMode(mode)
   { // either P5 or Console. Console uses 16 indexed colors as integer,         otherwise standard P5 Color
-
     if(mode==COLORMODE.CONSOLE){
+      console.log("switching to console color mode")
+      this.backgroundC=CONSOLE_COLOR.FG_BLACK
+      this.inkC=CONSOLE_COLOR.FG_WHITE
       this.ColorMode=mode
-      this.draw=this.draw_ConsoleColor;
+      this.draw = this.draw_ConsoleColor; // draw in console mode
     }
     else
     if (mode==COLORMODE.P5) {
+      console.log("P5 color mode")
       this.ColorMode=mode
-      this.draw=this.draw_P5Color;
+      this.draw=this.draw_P5Color; // draw in P5 mode, with P5 colors
     }
   }
 
@@ -88,6 +96,8 @@ export class VirtualConsole {
   }
 
   setBg(bg)   { // these become ineffective when CONSOLECOLOR_MODE is used
+    console.log("Setting background to " + bg)
+
     this.backgroundC=bg
     // this.bgs && this.bgs.fill(this.backgroundC)
   }
@@ -169,7 +179,56 @@ export class VirtualConsole {
   }
 
   draw_ConsoleColor() {
-    background(44)
+    push()
+    noStroke()
+
+    fill(this.P5colors._c(this.backgroundC))    
+
+    rect(this.originX,this.originY, this.nbCols*this.W, this.nbLines*this.H)
+
+    
+    textFont(this.fontName)
+    textSize(this.fontSize)   
+
+    //console.log("general ink " + this.inkC)
+    fill(this.P5colors._c(this.inkC))    
+
+    let currentInk=this.inkC
+    let currentBG=this.backgroundC
+    let xt,yt
+    let c
+
+    for(let i=0,n=this.chars.length; i<n ; i++ ) {
+
+      c=this.chars[i]
+
+      if (c != ' ') {
+
+        if ( this.inks[i] != currentInk ) {
+
+          //console.log("currentInk" + currentInk)
+          let col= this.inks[i]
+          // console.log("col " + col)
+          fill(this.P5colors._c(col))
+          currentInk=col
+
+        }
+
+        // text coords scaled to font size
+        yt= Math.floor(i/this.nbCols) * this.H
+        xt= (i % this.nbCols) * this.W
+
+        if(c=='\u2588') { // draw full rectangle for block
+          // A rectangle          
+          rect(xt + this.originX, this.originY + yt, this.W, this.H);
+        }
+        else text(c, xt + this.originX, this.originY + yt + this.H)
+        //  point(xt + this.originX, this.originY + yt + this.H)
+      } // end if c ' '
+    } // end for
+    
+
+    pop()
   }
   
   draw_P5Color() {

@@ -1,4 +1,6 @@
 import {VirtualConsole,PIXEL_TYPE} from './VirtualConsole.js'
+import { CONSOLE_COLOR } from './ConsoleColors.js';
+
 let sLevel='';
 let nLevelWidth;
 let nLevelHeight;
@@ -20,7 +22,7 @@ let fCameraPosX;
 let fCameraPosY;
 
 let debugMode=true
-let debugScreen
+
 
 export class Plateformer {
 
@@ -121,7 +123,7 @@ export class Plateformer {
 
     // handle input
     if (focused) {
-        debugMode && this.debug(0,5, "          "  )
+        debugMode && this.debug(0,5, "          "  ) // erase "lost focus" since we have focus !
         // result : this.requestedAction (one letter)
         if (keyIsPressed) {
             this.keyHeld = (keyCode == this.previousKeyCode);
@@ -307,18 +309,14 @@ export class Plateformer {
                     break;
 
                 case 'O':
-                    //this.Screen.textFill(x * this.nTileWidth - fTileOffsetX, y * this.nTileHeight - fTileOffsetY, ((x + 1) * fTileOffsetX) - (1 + this.fOffsetX), ((y + 1) * this.nTileHeight) - (1 + fTileOffsetY), PIXEL_TYPE.PIXEL_SOLID, "yellow")
-                    this.Screen.textFill(x * this.nTileWidth -(0|fTileOffsetX), y * this.nTileHeight -(0|fTileOffsetY), ((x + 1) * this.nTileWidth) - (1 +(0|fTileOffsetX)), ((y + 1) * this.nTileHeight) - (1 +(0|fTileOffsetY)), PIXEL_TYPE.PIXEL_SOLID, "orange")
+                    this.Screen.textFill(x * this.nTileWidth -(0|fTileOffsetX), y * this.nTileHeight -(0|fTileOffsetY), ((x + 1) * this.nTileWidth) - (1 +(0|fTileOffsetX)), ((y + 1) * this.nTileHeight) - (1 +(0|fTileOffsetY)), PIXEL_TYPE.PIXEL_SOLID, CONSOLE_COLOR.FG_DARK_YELLOW)
                     break;
                         
-                case '#':
-                    //this.Screen.textFill(x * this.nTileWidth - fTileOffsetX, y * this.nTileHeight - fTileOffsetY, ((x + 1) * fTileOffsetX) - (1 + this.fOffsetX), ((y + 1) * this.nTileHeight) - (1 + fTileOffsetY), PIXEL_TYPE.PIXEL_SOLID, "yellow")
-                    this.Screen.textFill(x * this.nTileWidth -(0|fTileOffsetX), y * this.nTileHeight -(0|fTileOffsetY), ((x + 1) * this.nTileWidth) - (1 +(0|fTileOffsetX)), ((y + 1) * this.nTileHeight) - (1 +(0|fTileOffsetY)), PIXEL_TYPE.PIXEL_SOLID, "yellow")
-                    //this.Screen.textFill(x * this.nTileWidth - fTileOffsetX, y * this.nTileHeight - fTileOffsetY, ((x + 1) * fTileOffsetX) - (1 + this.fOffsetX), ((y + 1) * this.nTileHeight) - (1 + fTileOffsetY), PIXEL_TYPE.PIXEL_SOLID, "yellow")
-                    
+                case '#':                    
+                    this.Screen.textFill(x * this.nTileWidth -(0|fTileOffsetX), y * this.nTileHeight -(0|fTileOffsetY), ((x + 1) * this.nTileWidth) - (1 +(0|fTileOffsetX)), ((y + 1) * this.nTileHeight) - (1 +(0|fTileOffsetY)), PIXEL_TYPE.PIXEL_SOLID, CONSOLE_COLOR.FG_YELLOW)                    
                     break;
                 default:
-                     console.log("alert ! : ", TileChar) 
+                     //console.log("alert ! : ", TileChar) 
                      break;                    
             } //switch
         } // 2nd for
@@ -334,7 +332,7 @@ export class Plateformer {
     debugMode && this.debug(46,0,"subtractionX>" + nf(xP,2,2).toString())
     debugMode && this.debug(46,1,"subtractionY>" + nf(yP,2,2).toString())
 
-    this.Screen.textFill( (xP * this.nTileWidth)|0,0|(yP * this.nTileHeight), 0|(((xP + 1.0) * this.nTileWidth)-1), 0|(((yP + 1.0) * this.nTileHeight)-1), PIXEL_TYPE.PIXEL_SOLID, "red")
+    this.Screen.textFill( (xP * this.nTileWidth)|0,0|(yP * this.nTileHeight), 0|(((xP + 1.0) * this.nTileWidth)-1), 0|(((yP + 1.0) * this.nTileHeight)-1), PIXEL_TYPE.PIXEL_SOLID, CONSOLE_COLOR.FG_RED )
 
     }
 

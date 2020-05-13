@@ -1,8 +1,10 @@
 import {VirtualConsole, PIXEL_TYPE, COLORMODE} from './VirtualConsole.js'
+import {CONSOLE_COLOR, P5COLOR} from './ConsoleColors.js'
 import {Plateformer} from './Plateformer.js'
 
 
-let vs
+
+//let vs
 let game
 
 function preload() {
@@ -25,8 +27,11 @@ function setup() {
   noSmooth();
   setAttributes('antialias', false);
 
-  vs = new VirtualConsole(160,96, 8, 8, 'Roboto Mono', 8)
-  vs.setColorMode(COLORMODE.P5) // colors will be given as integers from 0 to 31
+  let vs = new VirtualConsole(160,96, 8, 8, 'Roboto Mono', 8)
+  vs.setColorMode(COLORMODE.CONSOLE) // colors will be given as integers from 0 to 31 in console mode, otherwise standard P5
+  
+  vs.setBg(CONSOLE_COLOR.FG_DARK_CYAN)
+  vs.clear()
 
   // these are OK
   //vs = new VirtualConsole(160, 120, 4, 6, 'Courier Prime', 8)
@@ -34,7 +39,6 @@ function setup() {
 
 //  vs.setOriginX(20)
 //  vs.setOriginY(10)
-  // vs.setBg('steelblue')
   
 /*
   let txto() = async () { await(await fetch('jario.txt')).text()) }
@@ -63,6 +67,8 @@ function setup() {
   //game.onUserUpdate()
   //noLoop()
   
+  //console.log(game)
+  //game.draw()
 }
 
 function draw() {
