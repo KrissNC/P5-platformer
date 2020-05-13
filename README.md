@@ -1,9 +1,8 @@
-# P5js-virtual-text-console
+# P5js-Mario-like platformer game
 
-This provides a virtual text console to P5 sketchs.
+This is an attempt to port a C++ mario like minigame to JS using P5js.
 
-The VirtualConsole object, stores a screen. Text and colors including background colors.
+Thanks to Javidx9 for his work on this (url to be inserted (search javidX platformer on Youtube))
 
-The screen is drawn to using print, println, clear, setInk, setBg, gotoXY etc...
+I had to translate the .spr files to text, for debugging purpose.
 
-... and it is rendered to any (x,y) when virtualScreen.draw() is called.

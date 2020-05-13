@@ -23,8 +23,10 @@ export class VirtualConsole {
 
     this.fontName = pFont
     this.fontSize = pSize
-    
-    this.setInk('white') // Defaults
+
+    this.setColorMode(COLORMODE.P5)
+
+    this.setInk('white') // Defaults for P5 color mode : use setink() and clear() to switch to consoleColor mode
     this.setBg('black')
 
     this.nbElems = this.nbCols * this.nbLines
@@ -58,6 +60,20 @@ export class VirtualConsole {
     
   }
 
+  setColorMode(mode)
+  { // either P5 or Console. Console uses 16 indexed colors as integer,         otherwise standard P5 Color
+
+    if(mode==COLORMODE.CONSOLE){
+      this.ColorMode=mode
+      this.draw=this.draw_ConsoleColor;
+    }
+    else
+    if (mode==COLORMODE.P5) {
+      this.ColorMode=mode
+      this.draw=this.draw_P5Color;
+    }
+  }
+
   clear() {
     this.inks.fill(this.inkC)
     this.bgs.fill(this.backgroundC)
@@ -65,14 +81,13 @@ export class VirtualConsole {
     this.cursorX = 0 
     this.cursorY = 0 
     this.offSet = 0
-
   }
 
-  setInk(ink) {
+  setInk(ink) { // these become ineffective when CONSOLECOLOR_MODE is used
     this.inkC=ink
   }
 
-  setBg(bg) {
+  setBg(bg)   { // these become ineffective when CONSOLECOLOR_MODE is used
     this.backgroundC=bg
     // this.bgs && this.bgs.fill(this.backgroundC)
   }
@@ -94,15 +109,11 @@ export class VirtualConsole {
 
     for(let y=y1 ; y <= y2 ; y++) {
       this.gotoXY(x1,y)
-//      console.log("inside loop offSet is : ", this.offSet)
       for(let x=x1; x <= x2; x++) {
-        //console.log(this.offSet)
         this.chars[this.offSet] = chr
         this.inks[this.offSet]  = ink
         this.bgs[this.offSet++] = this.backgroundC
       }
-//      console.log("inside2 loop offSet is : ", this.offSet)
-//      console.log ("(x=",this.cursorX,"), (y=", this.cursorY,")")
     }
   }
 
@@ -157,13 +168,15 @@ export class VirtualConsole {
     return this.nbLines
   }
 
-
-  draw()   {
+  draw_ConsoleColor() {
+    background(44)
+  }
+  
+  draw_P5Color() {
     push()
     noStroke()
     fill(this.backgroundC)    
     rect(this.originX,this.originY, this.nbCols*this.W, this.nbLines*this.H)
-
 
     textFont(this.fontName)
     textSize(this.fontSize)   
@@ -173,8 +186,7 @@ export class VirtualConsole {
     let currentBG=this.backgroundC
     let xt,yt
     let c
-    //stroke('white'); // Change the color ofr the point if any
-    //noStroke() // 
+
     for(let i=0,n=this.chars.length; i<n ; i++ ){
       c=this.chars[i]
 
@@ -197,8 +209,8 @@ export class VirtualConsole {
       } // end if c ' '
     } // end for
     pop()
-  } // end draw
 
+  }
 
 }
 
@@ -207,4 +219,9 @@ export const PIXEL_TYPE = {
 	PIXEL_THREEQUARTERS : '\u2593',
 	PIXEL_HALF : '\u2592',
 	PIXEL_QUARTER : '\u2591'
+}
+
+export const COLORMODE = {
+	CONSOLE : 0,
+  P5 : 1
 }

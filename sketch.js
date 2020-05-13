@@ -1,4 +1,4 @@
-import {VirtualConsole, PIXEL_TYPE} from './VirtualConsole.js'
+import {VirtualConsole, PIXEL_TYPE, COLORMODE} from './VirtualConsole.js'
 import {Plateformer} from './Plateformer.js'
 
 
@@ -6,6 +6,8 @@ let vs
 let game
 
 function preload() {
+
+
 }
 
 /*
@@ -24,14 +26,21 @@ function setup() {
   setAttributes('antialias', false);
 
   vs = new VirtualConsole(160,96, 8, 8, 'Roboto Mono', 8)
+  vs.setColorMode(COLORMODE.P5) // colors will be given as integers from 0 to 31
+
   // these are OK
   //vs = new VirtualConsole(160, 120, 4, 6, 'Courier Prime', 8)
   // vs = new VirtualConsole(160, 120, 4, 9, 'Consolas',8)
 
 //  vs.setOriginX(20)
 //  vs.setOriginY(10)
-  vs.setBg('steelblue')
+  // vs.setBg('steelblue')
   
+/*
+  let txto() = async () { await(await fetch('jario.txt')).text()) }
+  console.log(txto)
+*/
+
   /*
   vs.textFill(0,0,0,0, PIXEL_TYPE.PIXEL_SOLID ,'orange')
   vs.textFill(0,1,0,1, PIXEL_TYPE.PIXEL_SOLID ,'green')

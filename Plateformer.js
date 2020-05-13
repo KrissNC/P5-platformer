@@ -29,7 +29,7 @@ export class Plateformer {
     if (debugMode) 
         {
             this.debugScreen = new VirtualConsole(80, 6, 11, 12, 'Roboto Mono', 14)
-            console.log(this.debugScreen)
+            //console.log(this.debugScreen)
 
             this.debugScreen.setOriginX(0)
             this.debugScreen.setOriginY(768)
@@ -70,7 +70,7 @@ export class Plateformer {
     nLevelHeight = 16;
 
     sLevel = ""
-    sLevel += "...............................................................#";
+    
     sLevel += "...............................................................#";
     sLevel += "........#####..................................................#";
     sLevel += ".......####....................................................#";
@@ -78,15 +78,15 @@ export class Plateformer {
     sLevel += ".....##########.......###..............#.#....................O#";
     sLevel += "....................###................#.#......................";
     sLevel += "...................####.........................................";
-    sLevel += "#####...#######OOO##...#############.##############.....########";
+    sLevel += "#####...#######OOO##...#############.############.......########";
     sLevel += "...................................#.#...............###........";
     sLevel += "...############.........############.#............###...........";
     sLevel += "...#..........#.........#............#.........###..............";
-    sLevel += "........................#.############......###.................";
+    sLevel += "........................#.###########.......###.................";
     sLevel += "........................#................###....................";
-    sLevel += "........................#################.......................";
-    sLevel += "....OOOOO.......................................................";
-    
+    sLevel += "........................#####........#####......................";
+    sLevel += "....OOOOO..........................#............................";
+    sLevel += "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO";
     // Player Properties
 	fPlayerPosY = 1.0;
     fPlayerVelX = 0.0;
@@ -109,63 +109,105 @@ export class Plateformer {
     onUserUpdate() {
     // update and draw
 
-    fPlayerVelX = 0.0
-    fPlayerVelY = 0.0
+    //fPlayerVelX = 0.0
+    //fPlayerVelY = 0.0
+
+    let elapsedTime = deltaTime/1000
+    debugMode && this.debug(0,3, "elapsedTime>"+ nf(elapsedTime,2,5).toString() + "   ")
+    //debugMode && this.debug(0,3, elapsedTime.toString() + "   ")
+
 
     this.Screen.clear()
 
     // handle input
-    // result : this.requestedAction (one letter)
-    if (keyIsPressed) {
-        this.keyHeld = (keyCode == this.previousKeyCode);
-        // this.keyHeld = false;
+    if (focused) {
+        debugMode && this.debug(0,5, "          "  )
+        // result : this.requestedAction (one letter)
+        if (keyIsPressed) {
+            this.keyHeld = (keyCode == this.previousKeyCode);
+            // this.keyHeld = false;
 
-        switch (keyCode) {
+            switch (keyCode) {
 
-            case 38:
-                fPlayerVelY = -6.0
-                break;
+                case 38:
+                    fPlayerVelY += -6.0 * elapsedTime
+                    break;
 
-            case 40:
-                fPlayerVelY = 6.0
-                //  this.requestedAction = "D"; // accelerate downwards
-                //  break;
-                break;
+                case 40:
+                    fPlayerVelY += 6.0 * elapsedTime
+                    //  this.requestedAction = "D"; // accelerate downwards
+                    //  break;
+                    break;
 
-            case 37:
-                // left
-                fPlayerVelX = -6.0
-                break;
+                case 37:
+                    // left
+                    fPlayerVelX += -13.0 * elapsedTime
+                    break;
 
-            case 39:
-                // right
-                fPlayerVelX = 6.0
-                break;
-                /*
-                            case 32:
-                              if (!this.keyHeld) { // if "space" no double jump
+                case 39:
+                    // right
+                    fPlayerVelX += 13.0 * elapsedTime
 
-                              }
-                              break;
-                */
-                //case 27:
-                //  this.requestedAction = "X"; // exit
-                //  break;
-            default:
+                    break;
+
+                case 32:
+                    if (!this.keyHeld) { // if "space" no double jump
+                        if (fPlayerVelY == 0) {
+                            fPlayerVelY = -13
+                        }
+                    }
+                    break;
+
+                    //case 27:
+                    //  this.requestedAction = "X"; // exit
+                    //  break;
+                default:
+            }
+            this.previousKeyCode = keyCode;
+
+        } else {
+            this.keyHeld = false;
+            this.previousKeyCode = 0;
         }
-        this.previousKeyCode = keyCode;
-        
-    } else {
-        this.keyHeld = false;
-        this.previousKeyCode = 0;
+    }
+    else
+    {
+        debugMode && this.debug(0,5, "lost focus")
     }
 
+    // gravity
+    fPlayerVelY += 25.0 * elapsedTime;
 
-    //console.log(deltaTime)
+    // Drag
 
-    let elapsedTime = deltaTime/1000
+    if (!keyIsPressed) {
+
+        if (bPlayerOnGround)
+        // {
+             //fPlayerVelX += - 2.0 * fPlayerVelX  * elapsedTime;
+             fPlayerVelX *= 0.88
+             if (Math.abs(fPlayerVelX) < 0.2) fPlayerVelX = 0.0;
+        // }
+    
+    }
+
     fNewPlayerPosX = fPlayerPosX + fPlayerVelX * elapsedTime
     fNewPlayerPosY = fPlayerPosY + fPlayerVelY * elapsedTime
+
+        // Clamp velocities
+    let maxVel = 8.0
+    if (fPlayerVelX > maxVel)
+        fPlayerVelX = maxVel;
+
+    if (fPlayerVelX < -maxVel)
+        fPlayerVelX = -maxVel;
+
+    if (fPlayerVelY > maxVel*10)
+        fPlayerVelY = maxVel*10;
+
+    if (fPlayerVelY < -maxVel*10)
+        fPlayerVelY = -maxVel*10;
+
 
     // Check for Collision
     if (fPlayerVelX <= 0) // Moving Left
@@ -173,7 +215,7 @@ export class Plateformer {
         if (this.getTileChar(0|fNewPlayerPosX, 0|fPlayerPosY) != '.' || this.getTileChar(fNewPlayerPosX|0, 0|(fPlayerPosY + 0.9)) != '.')
         {
             fNewPlayerPosX = (0|fNewPlayerPosX) + 1;
-            fPlayerVelX = 0;
+            fPlayerVelX = 0.0;
         }
     }
     else // Moving Right
@@ -181,7 +223,7 @@ export class Plateformer {
         if (this.getTileChar((fNewPlayerPosX + 1.0)|0, fPlayerPosY|0) != '.' || this.getTileChar((fNewPlayerPosX + 1.0)|0, (fPlayerPosY + 0.9)|0) != '.')
         {
             fNewPlayerPosX = 0|fNewPlayerPosX;
-            fPlayerVelX = 0;
+            fPlayerVelX = 0.0;
             
         }
     }
@@ -205,7 +247,10 @@ export class Plateformer {
             // nDirModX = 0;
         }
     }
-   
+
+    debugMode && this.debug(0 ,4,"VelocityX>" + nf(fPlayerVelX,2,2).toString()+"  ")
+    debugMode && this.debug(20,4,"VelocityY>" + nf(fPlayerVelY,2,2).toString()+"  ")
+ 
     fPlayerPosX = fNewPlayerPosX    
     fPlayerPosY = fNewPlayerPosY
 
@@ -227,8 +272,11 @@ export class Plateformer {
 
     if (this.fOffsetY > (nLevelHeight - this.nVisibleTilesY)) this.fOffsetY = nLevelHeight - this.nVisibleTilesY;
     
-    this.debug(0,0,"fOfssetX>" + nf(this.fOffsetX,3,2).toString())
+    debugMode && this.debug(30,0,"fOfssetX>" + nf(this.fOffsetX,2,2).toString())
+    debugMode && this.debug(30,1,"fOfssetY>" + nf(this.fOffsetY,2,2).toString())
 
+
+    debugMode && this.debug(0,2, "IsOnFloor>" + bPlayerOnGround.toString()+"  " )
     //console.log("offsetX ",this.fOffsetX)
     //console.log(this.fOffsetY)
     
@@ -276,13 +324,15 @@ export class Plateformer {
         } // 2nd for
     } // end for
 
-    this.debug(16,0,"player pos X>" + nf(fPlayerPosX,3,2).toString())
+    debugMode && this.debug(0,0,"player pos X>" + nf(fPlayerPosX,2,2).toString()+"  ")
+    debugMode && this.debug(0,1,"player pos Y>" + nf(fPlayerPosY,2,2).toString()+"  ")
     
     // player
     let xP = fPlayerPosX - this.fOffsetX    
     let yP = fPlayerPosY - this.fOffsetY
 
-    this.debug(16,2,"subtraction>" + nf(xP,3,2).toString())
+    debugMode && this.debug(46,0,"subtractionX>" + nf(xP,2,2).toString())
+    debugMode && this.debug(46,1,"subtractionY>" + nf(yP,2,2).toString())
 
     this.Screen.textFill( (xP * this.nTileWidth)|0,0|(yP * this.nTileHeight), 0|(((xP + 1.0) * this.nTileWidth)-1), 0|(((yP + 1.0) * this.nTileHeight)-1), PIXEL_TYPE.PIXEL_SOLID, "red")
 
@@ -307,14 +357,10 @@ export class Plateformer {
     draw() {
         this.Screen.draw()
 
-        this.debugScreen.draw()
+        debugMode && this.debugScreen.draw()
     }
 
     debug(x, y, st) {
-        let l= st.length
-        let Erase = "                                                  ".substring(0,l)
-        this.debugScreen.gotoXY(x,y)
-        this.debugScreen.write(Erase)
         this.debugScreen.gotoXY(x,y)
         this.debugScreen.write(st)   
     }
